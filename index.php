@@ -144,8 +144,16 @@ $colors = [
                             <p><?php echo nl2br(htmlspecialchars($note['note'])); ?></p>
                         </div>
                         <div class="note-actions">
-                            <a href="edit.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-info btn-sm me-2"><i class="text-white fa fa-edit"></i></a>
-                            <a href="delete.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')"><i class="text-white fa fa-trash"></i></a>
+                            <!-- Tombol Buka Link -->
+                            <button class="btn rounded-circle btn-success btn-sm me-2" data-note="<?php echo htmlspecialchars($note['note']); ?>" onclick="openLinks(this)">
+                                <i class="fa fa-external-link-alt"></i>
+                            </button>
+                            <a href="edit.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-info btn-sm me-2">
+                                <i class="text-white fa fa-edit"></i>
+                            </a>
+                            <a href="delete.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
+                                <i class="text-white fa fa-trash"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -155,6 +163,7 @@ $colors = [
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Fungsi untuk mencari note
         document.getElementById('search').addEventListener('keyup', function() {
             const searchText = this.value.toLowerCase();
             const notes = document.querySelectorAll('.note-card-wrapper');
@@ -164,6 +173,29 @@ $colors = [
                 note.style.display = noteText.includes(searchText) ? '' : 'none';
             });
         });
+
+        // Fungsi untuk membuka link
+        function openLinks(button) {
+            // Ambil konten note dari atribut data-note
+            const noteContent = button.getAttribute('data-note');
+
+            // Ambil semua link dari konten note
+            const linkRegex = /https?:\/\/[^\s]+/g;
+            const links = noteContent.match(linkRegex) || [];
+
+            // Batasi hanya 15 link pertama
+            const limitedLinks = links.slice(0, 15);
+
+            // Buka setiap link di tab baru
+            limitedLinks.forEach(link => {
+                window.open(link.trim(), '_blank');
+            });
+
+            // Jika tidak ada link, beri pesan
+            if (limitedLinks.length === 0) {
+                alert('Tidak ada link yang ditemukan di note ini.');
+            }
+        }
     </script>
 </body>
 
