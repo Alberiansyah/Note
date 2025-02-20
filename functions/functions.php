@@ -72,4 +72,11 @@ class Functions
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function makeLinksClickable($text)
+    {
+        $pattern = '/(https?:\/\/[^\s]+)/';
+        $replacement = '<a href="$1" target="_blank" style="text-decoration: none;">$1</a>';
+        return preg_replace($pattern, $replacement, $text);
+    }
 }

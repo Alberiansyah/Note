@@ -80,6 +80,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container mt-5">
         <h1>Tambah Note</h1>
+        <nav aria-label="breadcrumb" class="bg-light p-3 rounded">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">Library</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Data</li>
+            </ol>
+        </nav>
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="nama" class="form-label">Nama:</label>

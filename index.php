@@ -64,7 +64,7 @@ $colors = [
             display: flex;
             flex-direction: column;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 5px;
             color: #333;
             position: relative;
             overflow-x: hidden;
@@ -78,12 +78,19 @@ $colors = [
         }
 
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 7.5px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.3);
+            /* Sama dengan scrollbar-color */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            /* Mengikuti nilai 'transparent' dari scrollbar-color */
+            border-radius: 10px;
         }
 
         .note-content {
@@ -113,13 +120,6 @@ $colors = [
             border-radius: 8px;
             padding: 5px 10px;
         }
-
-        * {
-            scrollbar-width: thin;
-            /* Bisa 'auto', 'thin', atau 'none' */
-            scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-            /* Warna thumb dan track */
-        }
     </style>
 </head>
 
@@ -141,7 +141,7 @@ $colors = [
                     <div class="note-card shadow-sm" style="background-color: <?php echo $colors[$index % count($colors)]; ?>">
                         <h5><?php echo htmlspecialchars($note['nama']); ?></h5>
                         <div class="note-content">
-                            <p><?php echo nl2br(htmlspecialchars($note['note'])); ?></p>
+                            <p><?php echo nl2br($functions->makeLinksClickable(htmlspecialchars($note['note']))); ?></p>
                         </div>
                         <div class="note-actions">
                             <!-- Tombol Buka Link -->
