@@ -48,7 +48,6 @@ $colors = [
     '#FFECB3'
 ];
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 
@@ -68,13 +67,9 @@ $colors = [
             color: #333;
             position: relative;
             overflow-x: hidden;
-            /* Menghilangkan scroll horizontal */
             overflow-y: auto;
-            /* Tetap memungkinkan scroll vertikal jika diperlukan */
             word-wrap: break-word;
-            /* Memaksa teks panjang agar terpotong ke baris berikutnya */
             box-sizing: border-box;
-            /* Menghindari padding membuat card melebar */
         }
 
         ::-webkit-scrollbar {
@@ -83,13 +78,11 @@ $colors = [
 
         ::-webkit-scrollbar-thumb {
             background: rgba(0, 0, 0, 0.3);
-            /* Sama dengan scrollbar-color */
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-track {
             background: transparent;
-            /* Mengikuti nilai 'transparent' dari scrollbar-color */
             border-radius: 10px;
         }
 
@@ -113,12 +106,45 @@ $colors = [
             bottom: 0;
             background-color: inherit;
             padding: 5px 0;
-            text-align: right;
+            display: flex;
+            /* Menggunakan Flexbox */
+            align-items: center;
+            /* Memastikan elemen sejajar vertikal */
+            gap: 10px;
+            /* Jarak antara elemen */
         }
 
         .note-actions .btn {
             border-radius: 8px;
             padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px;
+            /* Tinggi tombol */
+            width: 30px;
+            /* Lebar tombol */
+        }
+
+        .slider-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-right: auto;
+            /* Posisikan slider ke kiri */
+        }
+
+        .slider-container input[type="range"] {
+            width: 100%;
+            /* Lebar slider */
+        }
+
+        .slider-container span {
+            font-size: 14px;
+            min-width: 20px;
+            /* Lebar minimum untuk nilai slider */
+            text-align: center;
         }
     </style>
 </head>
@@ -144,11 +170,16 @@ $colors = [
                             <p><?php echo nl2br($functions->makeLinksClickable(htmlspecialchars($note['note']))); ?></p>
                         </div>
                         <div class="note-actions">
+                            <!-- Slider untuk mengatur jumlah link yang dibuka -->
+                            <div class="slider-container">
+                                <input type="range" min="1" max="30" value="15" class="link-slider">
+                                <span class="slider-value">15</span>
+                            </div>
                             <!-- Tombol Buka Link -->
-                            <button class="btn rounded-circle btn-success btn-sm me-2" data-note="<?php echo htmlspecialchars($note['note']); ?>" onclick="openLinks(this)">
+                            <button class="btn rounded-circle btn-success btn-sm" data-note="<?php echo htmlspecialchars($note['note']); ?>" onclick="openLinks(this)">
                                 <i class="fa fa-external-link-alt"></i>
                             </button>
-                            <a href="edit.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-info btn-sm me-2">
+                            <a href="edit.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-info btn-sm">
                                 <i class="text-white fa fa-edit"></i>
                             </a>
                             <a href="delete.php?id=<?php echo $note['id']; ?>" class="btn rounded-circle btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?')">
@@ -179,12 +210,16 @@ $colors = [
             // Ambil konten note dari atribut data-note
             const noteContent = button.getAttribute('data-note');
 
+            // Ambil nilai dari slider yang sesuai
+            const slider = button.parentElement.querySelector('.link-slider');
+            const linkCount = parseInt(slider.value, 10);
+
             // Ambil semua link dari konten note
             const linkRegex = /https?:\/\/[^\s]+/g;
             const links = noteContent.match(linkRegex) || [];
 
-            // Batasi hanya 15 link pertama
-            const limitedLinks = links.slice(0, 15);
+            // Batasi jumlah link yang akan dibuka sesuai nilai slider
+            const limitedLinks = links.slice(0, linkCount);
 
             // Buka setiap link di tab baru
             limitedLinks.forEach(link => {
@@ -196,6 +231,14 @@ $colors = [
                 alert('Tidak ada link yang ditemukan di note ini.');
             }
         }
+
+        // Update nilai slider secara real-time
+        document.querySelectorAll('.link-slider').forEach(slider => {
+            const sliderValue = slider.parentElement.querySelector('.slider-value');
+            slider.addEventListener('input', () => {
+                sliderValue.textContent = slider.value;
+            });
+        });
     </script>
 </body>
 
