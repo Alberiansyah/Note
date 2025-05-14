@@ -172,8 +172,8 @@ $colors = [
                         <div class="note-actions">
                             <!-- Slider untuk mengatur jumlah link yang dibuka -->
                             <div class="slider-container">
-                                <input type="range" min="1" max="30" value="15" class="link-slider">
-                                <span class="slider-value">15</span>
+                                <input type="range" min="1" max="40" value="20" class="link-slider">
+                                <span class="slider-value">20</span>
                             </div>
                             <!-- Tombol Buka Link -->
                             <button class="btn rounded-circle btn-success btn-sm" data-note="<?php echo htmlspecialchars($note['note']); ?>" onclick="openLinks(this)">
