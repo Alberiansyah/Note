@@ -1,0 +1,17 @@
+{
+    "name": "red/note",
+    "description": "Simple note-taking app with pin and favorite features",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Alberiansyah",
+            "email": "alberiansyah1@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "classmap": [
+            "functions/functions.php"
+        ]
+    }
+}

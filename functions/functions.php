@@ -1,6 +1,4 @@
 <?php
-require __DIR__ . '/../koneksi/koneksi.php';
-
 class Functions
 {
     private $pdo;
@@ -10,54 +8,42 @@ class Functions
         $this->pdo = $pdo;
     }
 
-    // CREATE: Tambah note baru dengan filter duplikat
-    public function createNote($nama, $note)
+    public function createNote($nama, $note, $tags = '')
     {
-        // Pisahkan setiap baris untuk menghindari duplikat
         $newLines = array_filter(array_map('trim', explode("\n", $note)));
-
-        // Hapus duplikat antar baris
         $uniqueLines = array_unique($newLines);
-
-        // Gabungkan kembali ke dalam satu string
         $cleanNote = implode("\n", $uniqueLines);
 
-        // Simpan note yang sudah dibersihkan ke database
-        $stmt = $this->pdo->prepare("INSERT INTO tb_notes (nama, note) VALUES (:nama, :note)");
-        $stmt->execute([':nama' => $nama, ':note' => $cleanNote]);
+        $stmt = $this->pdo->prepare("INSERT INTO tb_notes (nama, note, tags) VALUES (:nama, :note, :tags)");
+        $stmt->execute([':nama' => $nama, ':note' => $cleanNote, ':tags' => $tags]);
         return $this->pdo->lastInsertId();
     }
 
-    // READ: Ambil semua note
     public function readNotes()
     {
-        $stmt = $this->pdo->query("SELECT * FROM tb_notes ORDER BY nama ASC");
+        $stmt = $this->pdo->query("SELECT * FROM tb_notes ORDER BY is_pinned DESC, nama ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // UPDATE: Edit note dengan filter duplikat
-    public function updateNote($id, $nama, $newNote)
+    public function updateNote($id, $nama, $newNote, $tags = '', $isPinned = 0, $isFavorite = 0)
     {
-        // Pisahkan setiap baris untuk menghindari duplikat
         $newLines = array_filter(array_map('trim', explode("\n", $newNote)));
-
-        // Hapus duplikat antar baris
         $uniqueLines = array_unique($newLines);
-
-        // Gabungkan kembali ke dalam satu string
         $cleanNote = implode("\n", $uniqueLines);
 
-        $stmt = $this->pdo->prepare("UPDATE tb_notes SET nama = :nama, note = :note WHERE id = :id");
+        $stmt = $this->pdo->prepare("UPDATE tb_notes SET nama = :nama, note = :note, tags = :tags, is_pinned = :is_pinned, is_favorite = :is_favorite WHERE id = :id");
         $stmt->execute([
             ':nama' => $nama,
             ':note' => $cleanNote,
+            ':tags' => $tags,
+            ':is_pinned' => $isPinned,
+            ':is_favorite' => $isFavorite,
             ':id' => $id
         ]);
 
         return $stmt->rowCount();
     }
 
-    // DELETE: Hapus note
     public function deleteNote($id)
     {
         $stmt = $this->pdo->prepare("DELETE FROM tb_notes WHERE id = :id");
@@ -65,7 +51,6 @@ class Functions
         return $stmt->rowCount();
     }
 
-    // Ambil note by ID
     public function getNoteById($id)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM tb_notes WHERE id = :id");
@@ -73,10 +58,56 @@ class Functions
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function togglePin($id)
+    {
+        $note = $this->getNoteById($id);
+        $newPin = $note['is_pinned'] ? 0 : 1;
+        $stmt = $this->pdo->prepare("UPDATE tb_notes SET is_pinned = :is_pinned WHERE id = :id");
+        $stmt->execute([':is_pinned' => $newPin, ':id' => $id]);
+        return $newPin;
+    }
+
+    public function toggleFavorite($id)
+    {
+        $note = $this->getNoteById($id);
+        $newFav = $note['is_favorite'] ? 0 : 1;
+        $stmt = $this->pdo->prepare("UPDATE tb_notes SET is_favorite = :is_favorite WHERE id = :id");
+        $stmt->execute([':is_favorite' => $newFav, ':id' => $id]);
+        return $newFav;
+    }
+
+    public function duplicateNote($id)
+    {
+        $note = $this->getNoteById($id);
+        if ($note) {
+            $newName = $note['nama'] . ' (Copy)';
+            $this->createNote($newName, $note['note'], $note['tags']);
+            return true;
+        }
+        return false;
+    }
+
     public function makeLinksClickable($text)
     {
-        $pattern = '/(https?:\/\/[^\s]+)/';
-        $replacement = '<a href="$1" target="_blank" style="text-decoration: none;">$1</a>';
-        return preg_replace($pattern, $replacement, $text);
+        return preg_replace_callback(
+            '/(https?:\/\/[^\s]+)/',
+            function ($m) {
+                $url = htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8');
+                return '<a href="' . $url . '" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">' . $url . '</a>';
+            },
+            $text
+        );
+    }
+
+    public function countWords($text)
+    {
+        $text = trim($text);
+        if (empty($text)) return 0;
+        return count(preg_split('/\s+/', $text));
+    }
+
+    public function countChars($text)
+    {
+        return mb_strlen($text, 'UTF-8');
     }
 }
